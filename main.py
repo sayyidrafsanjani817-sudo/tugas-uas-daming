@@ -16,10 +16,10 @@ st.set_page_config(
 # =========================
 @st.cache_resource
 def load_models():
-    scaler = joblib.load("model/scaler.pkl")
-    kmeans = joblib.load("model/kmeans.pkl")
-    rf = joblib.load("model/random_forest.pkl")
-    features = joblib.load("model/features.pkl")
+    scaler = joblib.load("scaler.pkl")
+    kmeans = joblib.load("kmeans.pkl")
+    rf = joblib.load("random_forest.pkl")
+    features = joblib.load("features.pkl")
     return scaler, kmeans, rf, features
 
 scaler, kmeans, rf, features = load_models()
@@ -82,3 +82,4 @@ importance_df.set_index("Feature").plot(kind="bar", ax=ax)
 ax.set_title("Feature Importance - Random Forest")
 ax.set_ylabel("Nilai Importance")
 st.pyplot(fig)
+
