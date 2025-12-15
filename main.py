@@ -16,11 +16,11 @@ st.set_page_config(
 # =========================
 @st.cache_resource
 def load_models():
-    scaler = joblib.load("model/scaler.pkl")
-    kmeans = joblib.load("model/kmeans.pkl")
-    rf = joblib.load("model/random_forest.pkl")
-    logreg = joblib.load("model/logreg.pkl")
-    features = joblib.load("model/features.pkl")
+    scaler = joblib.load("scaler.pkl")
+    kmeans = joblib.load("kmeans.pkl")
+    rf = joblib.load("random_forest.pkl")
+    logreg = joblib.load("logreg.pkl")
+    features = joblib.load("features.pkl")
     return scaler, kmeans, rf, logreg, features
 
 scaler, kmeans, rf, logreg, features = load_models()
@@ -114,3 +114,4 @@ with tab2:
     coef_df.loc[cluster_select].plot(kind="bar", ax=ax)
     ax.set_title(f"Koefisien Logistic Regression - {cluster_select}")
     st.pyplot(fig)
+
