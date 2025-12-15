@@ -5,7 +5,7 @@ import joblib
 import matplotlib.pyplot as plt
 
 # =========================
-# Load Model
+# LOAD MODEL
 # =========================
 @st.cache_resource
 def load_models():
@@ -26,12 +26,11 @@ st.title("💳 Credit Card Clustering & Analysis")
 st.write("K-Means Clustering + Logistic Regression")
 
 # =========================
-# Sidebar Input
+# INPUT SIDEBAR
 # =========================
 st.sidebar.header("🔢 Input Data Nasabah")
 
 input_data = {}
-
 for feature in features:
     input_data[feature] = st.sidebar.number_input(
         feature, value=0.0
@@ -40,22 +39,17 @@ for feature in features:
 input_df = pd.DataFrame([input_data])
 
 # =========================
-# Prediction
+# PREDIKSI
 # =========================
 if st.sidebar.button("🔍 Prediksi Cluster"):
-    # Scaling
     scaled_input = scaler.transform(input_df)
 
-    # Clustering
     cluster = kmeans.predict(scaled_input)[0]
-
-    # Probabilitas Logistic Regression
     prob = logreg.predict_proba(scaled_input)[0]
 
     st.subheader("📌 Hasil Analisis")
     st.success(f"Nasabah termasuk ke **Cluster {cluster}**")
 
-    st.write("### 📊 Probabilitas Tiap Cluster")
     prob_df = pd.DataFrame(
         prob.reshape(1, -1),
         columns=[f"Cluster {i}" for i in logreg.classes_]
@@ -63,9 +57,10 @@ if st.sidebar.button("🔍 Prediksi Cluster"):
     st.dataframe(prob_df)
 
 # =========================
-# Koefisien Model
+# KOEFISIEN MODEL
 # =========================
 st.subheader("📈 Pengaruh Fitur (Logistic Regression)")
+
 coef_df = pd.DataFrame(
     logreg.coef_,
     columns=features,
@@ -75,7 +70,7 @@ coef_df = pd.DataFrame(
 st.dataframe(coef_df)
 
 # =========================
-# Visualisasi Koefisien
+# VISUALISASI KOEFISIEN
 # =========================
 cluster_select = st.selectbox(
     "Pilih Cluster",
@@ -87,4 +82,3 @@ coef_df.loc[cluster_select].plot(kind="bar", ax=ax)
 ax.set_title(f"Koefisien Logistic Regression - {cluster_select}")
 ax.set_ylabel("Nilai Koefisien")
 st.pyplot(fig)
-
