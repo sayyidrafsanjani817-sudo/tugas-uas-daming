@@ -3,83 +3,79 @@ import pandas as pd
 import numpy as np
 import joblib
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 
 # =========================
-# LOAD MODEL
+# Page Config
 # =========================
-@st.cache_resource
-def load_models():
-    scaler = joblib.load("model/scaler.pkl")
-    kmeans = joblib.load("model/kmeans.pkl")
-    logreg = joblib.load("model/logreg.pkl")
-    rf = joblib.load("model/random_forest.pkl")
-    features = joblib.load("model/features.pkl")
-    return scaler, kmeans, logreg, features
-
-scaler, kmeans, logreg, features = load_models()
+st.set_page_config(layout="wide")
+st.title("💳 Credit Card Clustering (RF + Logistic Regression)")
 
 # =========================
-# UI
+# Load Models
 # =========================
-st.set_page_config(page_title="Credit Card Clustering", layout="wide")
-
-st.title("💳 Credit Card Clustering & Analysis")
-st.write("K-Means Clustering + Logistic Regression")
-
-# =========================
-# INPUT SIDEBAR
-# =========================
-st.sidebar.header("🔢 Input Data Nasabah")
-
-input_data = {}
-for feature in features:
-    input_data[feature] = st.sidebar.number_input(
-        feature, value=0.0
-    )
-
-input_df = pd.DataFrame([input_data])
+scaler = joblib.load("model/scaler.pkl")
+kmeans = joblib.load("model/kmeans.pkl")
+rf = joblib.load("model/random_forest.pkl")
+logreg = joblib.load("model/logreg.pkl")
+features = joblib.load("model/features.pkl")
 
 # =========================
-# PREDIKSI
+# Upload Data
 # =========================
-if st.sidebar.button("🔍 Prediksi Cluster"):
-    scaled_input = scaler.transform(input_df)
+uploaded = st.file_uploader("Upload CC_GENERAL.csv", type=["csv"])
+if uploaded is None:
+    st.stop()
 
-    cluster = kmeans.predict(scaled_input)[0]
-    prob = logreg.predict_proba(scaled_input)[0]
-
-    st.subheader("📌 Hasil Analisis")
-    st.success(f"Nasabah termasuk ke **Cluster {cluster}**")
-
-    prob_df = pd.DataFrame(
-        prob.reshape(1, -1),
-        columns=[f"Cluster {i}" for i in logreg.classes_]
-    )
-    st.dataframe(prob_df)
+df = pd.read_csv(uploaded)
 
 # =========================
-# KOEFISIEN MODEL
+# Preprocessing
 # =========================
-st.subheader("📈 Pengaruh Fitur (Logistic Regression)")
-
-coef_df = pd.DataFrame(
-    logreg.coef_,
-    columns=features,
-    index=[f"Cluster {i}" for i in logreg.classes_]
-)
-
-st.dataframe(coef_df)
+df = df.drop(columns=["CUST_ID"], errors="ignore")
+df = df.fillna(df.median(numeric_only=True))
 
 # =========================
-# VISUALISASI KOEFISIEN
+# Scaling
 # =========================
-cluster_select = st.selectbox(
-    "Pilih Cluster",
-    coef_df.index
-)
+X = df[features]
+X_scaled = scaler.transform(X)
 
-fig, ax = plt.subplots(figsize=(8,4))
-coef_df.loc[cluster_select].plot(kind="bar", ax=ax)
-ax.set_title(f"Koefisien Logistic Regression - {cluster_select}")
-ax.set_ylabel("Nilai Koefisien")
+# =========================
+# Clustering
+# =========================
+df["Cluster"] = kmeans.predict(X_scaled)
+
+st.subheader("📊 Data + Cluster")
+st.dataframe(df.head())
+
+# =========================
+# PCA Visualization
+# =========================
+pca = PCA(n_components=2)
+pca_result = pca.fit_transform(X_scaled)
+
+df["PCA1"] = pca_result[:, 0]
+df["PCA2"] = pca_result[:, 1]
+
+fig, ax = plt.subplots()
+scatter = ax.scatter(df["PCA1"], df["PCA2"], c=df["Cluster"])
+ax.set_title("Visualisasi Cluster (PCA)")
+ax.set_xlabel("PCA 1")
+ax.set_ylabel("PCA 2")
+
 st.pyplot(fig)
+
+# =========================
+# Random Forest Prediction
+# =========================
+st.subheader("🌲 Random Forest Prediction")
+rf_pred = rf.predict(X_scaled)
+st.bar_chart(pd.Series(rf_pred).value_counts())
+
+# =========================
+# Logistic Regression Prediction
+# =========================
+st.subheader("📐 Logistic Regression Prediction")
+lr_pred = logreg.predict(X_scaled)
+st.bar_chart(pd.Series(lr_pred).value_counts())
