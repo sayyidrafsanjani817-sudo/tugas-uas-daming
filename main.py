@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 # =========================
 @st.cache_resource
 def load_models():
-    scaler = joblib.load("model/scaler.pkl")
-    kmeans = joblib.load("model/kmeans.pkl")
-    logreg = joblib.load("model/logreg.pkl")
-    features = joblib.load("model/features.pkl")
+    scaler = joblib.load("scaler.pkl")
+    kmeans = joblib.load("kmeans.pkl")
+    logreg = joblib.load("logreg.pkl")
+    features = joblib.load("features.pkl")
     return scaler, kmeans, logreg, features
 
 scaler, kmeans, logreg, features = load_models()
@@ -87,3 +87,4 @@ coef_df.loc[cluster_select].plot(kind="bar", ax=ax)
 ax.set_title(f"Koefisien Logistic Regression - {cluster_select}")
 ax.set_ylabel("Nilai Koefisien")
 st.pyplot(fig)
+
