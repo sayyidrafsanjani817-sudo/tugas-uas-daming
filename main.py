@@ -14,11 +14,11 @@ st.title("💳 Credit Card Clustering (RF + Logistic Regression)")
 # =========================
 # Load Models
 # =========================
-scaler = joblib.load("model/scaler.pkl")
-kmeans = joblib.load("model/kmeans.pkl")
-rf = joblib.load("model/random_forest.pkl")
-logreg = joblib.load("model/logreg.pkl")
-features = joblib.load("model/features.pkl")
+scaler = joblib.load("scaler.pkl")
+kmeans = joblib.load("kmeans.pkl")
+rf = joblib.load("random_forest.pkl")
+logreg = joblib.load("logreg.pkl")
+features = joblib.load("features.pkl")
 
 # =========================
 # Upload Data
@@ -79,3 +79,4 @@ st.bar_chart(pd.Series(rf_pred).value_counts())
 st.subheader("📐 Logistic Regression Prediction")
 lr_pred = logreg.predict(X_scaled)
 st.bar_chart(pd.Series(lr_pred).value_counts())
+
